@@ -8,6 +8,12 @@ import { ImCross } from "react-icons/im";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 import { app } from "@/firebase";
 import {
+  addDoc,
+  collection,
+  getFirestore,
+  serverTimestamp,
+} from "firebase/firestore";
+import {
   getDownloadURL,
   getStorage,
   ref,
@@ -16,11 +22,14 @@ import {
 
 export default function Header() {
   const { data: session } = useSession();
+  console.log(session);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploading, setImageFileUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [postuploading, setPostuploading] = useState(false);
+  const [caption, setCaption] = useState('');
   const filepickerRef = useRef(null);
 
   const addImagetoPost = (e) => {
@@ -36,17 +45,17 @@ export default function Header() {
 
     setImageFileUploading(true);
     const storage = getStorage(app);
-    const fileName = new Date().getTime() + '-' + selectedFile.name;
+    const fileName = new Date().getTime() + "-" + selectedFile.name;
     const storageRef = ref(storage, fileName);
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
     uploadTask.on(
-      'state_changed',
+      "state_changed",
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setUploadProgress(progress);
-        console.log('Upload is ' + progress + '% done');
+        console.log("Upload is " + progress + "% done");
       },
       (error) => {
         console.error(error);
@@ -61,6 +70,25 @@ export default function Header() {
         });
       }
     );
+  }
+
+  async function handleSubmit() {
+    setPostuploading(true);
+    try {
+      const docRef = await addDoc(collection(getFirestore(app), "posts"), {
+        username: session.user.username,
+        caption: caption,
+        profileImg: session.user.image,
+        image: imageFileUrl,
+        timestamp: serverTimestamp(),
+      });
+      setPostuploading(false);
+      setIsOpen(false);
+      location.reload();
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      setPostuploading(false);
+    }
   }
 
   useEffect(() => {
@@ -146,6 +174,7 @@ export default function Header() {
             maxLength="150"
             placeholder="Write something about the post..."
             className="m-4 border-none text-black text-center bg-gray-300 w-full focus:ring-0 outline-none"
+            onChange={(e) => setCaption(e.target.value)}
           />
           {imageFileUploading && (
             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
@@ -156,9 +185,14 @@ export default function Header() {
             </div>
           )}
           <button
-            disabled={!imageFileUrl || imageFileUploading}
+            disabled={
+              !selectedFile ||
+              caption.trim() === '' ||
+              postuploading ||
+              imageFileUploading
+            }
             className="w-full bg-blue-700 text-white p-2 shadow-md rounded-lg hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:brightness-100"
-            onClick={() => setIsOpen(false)}
+            onClick={handleSubmit}
           >
             Upload Post
           </button>
