@@ -136,7 +136,7 @@ export default function Header() {
             width={76}
             height={76}
             alt="postgram logo"
-            className={`${!session ? "hidden sm:block" : ""}`}
+            className={`${!session ? "hidden sm:block" : "xl:ml-8"}`}
           />
         </Link>
         <input
