@@ -7,11 +7,15 @@ import Modal from "react-modal";
 import { ImCross } from "react-icons/im";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 import { app } from "@/firebase";
+import { MdOutlineLibraryAdd } from "react-icons/md";
 import {
   addDoc,
   collection,
   getFirestore,
   serverTimestamp,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import {
   getDownloadURL,
@@ -22,7 +26,6 @@ import {
 
 export default function Header() {
   const { data: session } = useSession();
-  console.log(session);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
@@ -31,6 +34,8 @@ export default function Header() {
   const [postuploading, setPostuploading] = useState(false);
   const [caption, setCaption] = useState('');
   const filepickerRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   const addImagetoPost = (e) => {
     const file = e.target.files[0];
@@ -97,6 +102,31 @@ export default function Header() {
     }
   }, [selectedFile]);
 
+  const handleSearch = async (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    if (query.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const q = query(
+        collection(getFirestore(app), "users"),
+        where("username", "==", query)
+      );
+      const querySnapshot = await getDocs(q);
+      const results = [];
+      querySnapshot.forEach((doc) => {
+        results.push(doc.data());
+      });
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Error searching users: ", error);
+    }
+  };
+
   return (
     <div className="shadow-sm border-b sticky top-0 bg-blue-100 z-30 p-3">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
@@ -111,18 +141,15 @@ export default function Header() {
         </Link>
         <input
           type="text"
-          placeholder="Search...."
+          placeholder="Search by username..."
+          value={searchQuery}
+          onChange={handleSearch}
           className="hidden sm:block bg-gray-50 border border-gray-200 rounded text-sm w-full py-2 px-4 max-w-[310px]"
         />
         {session ? (
           <div className="flex justify-between w-full sm:w-auto lg:gap-6 gap-3">
-            <div className="flex items-center">
-              <button
-                className="px-6 py-3 bg-blue-700 text-white rounded-md"
-                onClick={() => setIsOpen(true)}
-              >
-                Post Now
-              </button>
+            <div className="flex items-center cursor-pointer">
+              <MdOutlineLibraryAdd className="text-3xl text-gray-600 ml-4"  onClick={() => setIsOpen(true)}/>
             </div>
             <div className="flex flex-col items-center">
               <img
@@ -142,6 +169,20 @@ export default function Header() {
           </button>
         )}
       </div>
+      {searchResults.length > 0 && (
+        <div className="absolute z-50 bg-white border border-gray-200 rounded w-full max-w-[310px] mt-2 p-2">
+          {searchResults.map((user, index) => (
+            <div key={index} className="flex items-center p-2 border-b last:border-0">
+              <img
+                src={user.profileImg}
+                alt={user.username}
+                className="w-10 h-10 rounded-full"
+              />
+              <span className="ml-3">{user.username}</span>
+            </div>
+          ))}
+        </div>
+      )}
       {isOpen && (
         <Modal
           isOpen={isOpen}

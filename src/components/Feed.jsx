@@ -1,18 +1,17 @@
-import React from 'react'
-import Post from './Post'
-import MiniProfile from './MiniProfile'
+import React from 'react';
+import Post from './Post';
+import MiniProfile from './MiniProfile';
 
 export default function Feed() {
   return (
-    <main className="grid grid-cols-1 md:grid-cols-3 md:max-w-7xl mx-auto">
-      {/**for post section */}
-      <section className="md:col-span-2">
+    <main className="grid grid-cols-1 lg:grid-cols-3 lg:max-w-7xl mx-auto px-1 sm:px-6 lg:px-8">
+      {/** For post section */}
+      <section className="lg:col-span-2">
         <Post />
       </section>
-
-      {/***for mini profile **/}
-      <section className="hidden md:inline-grid md:col-span-1">
-        <div className='fixed w-[427px]'>
+      {/** For mini profile */}
+      <section className="hidden lg:inline-grid lg:col-span-1">
+        <div className='lg:fixed w-full lg:w-[300px] xl:w-[427px]'>
           <MiniProfile />
         </div>
       </section>

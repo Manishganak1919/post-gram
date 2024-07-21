@@ -53,7 +53,7 @@ export default function AddLike({ id }) {
 
   return (
     <div>
-      <div className='flex border-t border-gray-100 px-4 pt-4'>
+      <div className='flex border-t border-gray-100 px-3 pt-4'>
         <div className='flex items-center gap-2'>
           {hasLiked ? (
             <HiHeart

@@ -7,7 +7,7 @@ export default function MiniProfile() {
   console.log(session);
   return (
     <div className="flex items-center justify-between mt-14 w-full">
-      <div className="flex items-center gap-5 ml-10">
+      <div className="flex items-center lg:gap-5 gap-2 xl:ml-10 ml-3">
         <img
           src={session?.user?.image || "/verified.png"}
           alt="user-profile-pic or post-gram logo"

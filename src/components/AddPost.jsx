@@ -48,7 +48,7 @@ export default function AddPost({ post }) {
         <span className="font-bold mr-2">{post.username}</span>
         {post.caption}
       </p>
-      <div className="flex gap-4 ml-5 my-4">
+      <div className="flex md:gap-4 gap-2 md:ml-5 ml-1 my-4">
         <AddLike id={post.id} />
         <Addcomment id={post.id} />
       </div>
